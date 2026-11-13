@@ -1,4 +1,4 @@
-using PCBDesigner.Domain.Drawings;
+using PCBDesigner.Application.Abstractions;
 
 namespace PCBDesigner.Application.Drawings;
 
@@ -6,5 +6,5 @@ public sealed record UploadDrawingResult(
     Guid Id,
     string OriginalFileName,
     long SizeBytes,
-    DrawingKind DetectedKind,
+    DrawingClassificationResult Analysis,
     string Status);
