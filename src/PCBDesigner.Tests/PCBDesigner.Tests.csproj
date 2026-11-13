@@ -17,5 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="..\PCBDesigner.Domain\PCBDesigner.Domain.csproj" />
     <ProjectReference Include="..\PCBDesigner.Application\PCBDesigner.Application.csproj" />
+    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\\PCBDesigner.Infrastructure\\PCBDesigner.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
