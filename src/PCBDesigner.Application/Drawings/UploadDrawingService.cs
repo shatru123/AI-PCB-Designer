@@ -1,5 +1,4 @@
 using PCBDesigner.Application.Abstractions;
-using PCBDesigner.Domain.Drawings;
 
 namespace PCBDesigner.Application.Drawings;
 
@@ -18,16 +17,16 @@ public sealed class UploadDrawingService(
         await request.Content.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
 
-        var kind = await classifier.ClassifyAsync(buffer, cancellationToken);
+        var analysis = await classifier.ClassifyAsync(buffer, extension, cancellationToken);
         buffer.Position = 0;
 
         await storage.SaveAsync(id, extension, buffer, cancellationToken);
 
+        var status = analysis.Kind == PCBDesigner.Domain.Drawings.DrawingKind.Unknown
+            ? "Uploaded; drawing type requires manual review."
+            : $"Uploaded; probable drawing type: {analysis.Kind}. Human verification required.";
+
         return new UploadDrawingResult(
-            id,
-            Path.GetFileName(request.OriginalFileName),
-            request.SizeBytes,
-            kind,
-            $"Uploaded; classification adapter returned {kind}; recognition pending.");
+            id, Path.GetFileName(request.OriginalFileName), request.SizeBytes, analysis, status);
     }
 }
