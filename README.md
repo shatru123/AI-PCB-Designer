@@ -7,7 +7,7 @@
 <p align="center">
   <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" />
   <img alt="KiCad" src="https://img.shields.io/badge/PCB%20Engine-KiCad-314CB0" />
-  <img alt="Status" src="https://img.shields.io/badge/status-foundation%20in%20progress-orange" />
+  <img alt="Status" src="https://img.shields.io/badge/status-classification%20foundation%20in%20progress-orange" />
   <img alt="License" src="https://img.shields.io/badge/license-see%20LICENSE-blue" />
 </p>
 
@@ -16,7 +16,7 @@ AI PCB Designer is an AI-assisted electronics design platform intended to turn *
 - **Printable PCB artwork** — exact-scale PDF, SVG, and PNG, including a selectable mirrored copper layer for toner-transfer workflows.
 - **Manufacturing package** — Gerber files, Excellon drill data, BOM, and a validation report.
 
-> **Current status:** This repository is at the initial backend foundation stage. Drawing upload and local storage are scaffolded. Drawing classification is currently a placeholder. AI recognition, schematic reconstruction, PCB layout/routing, KiCad integration, DRC, Gerber generation, and printable exports are not implemented yet. Do not use the current application to manufacture a PCB.
+> **Current status:** The backend upload foundation and a conservative first-pass classifier are implemented. SVG/PDF text heuristics can suggest schematic vs. PCB-layout type; raster uploads currently receive signature/dimension inspection only and remain unclassified. OCR, vision-model recognition, schematic reconstruction, PCB layout/routing, KiCad integration, DRC, Gerber generation, and printable exports are not implemented. This is not manufacturing software yet; do not use it to manufacture a PCB.
 
 ## Product workflow
 
@@ -45,7 +45,7 @@ The two input modes are deliberately separate. A schematic describes **electrica
 |---|---|
 | Drawing intake | JPG, JPEG, PNG, PDF, and SVG upload |
 | Image preparation | Rotation, crop, perspective correction, denoising, contrast enhancement |
-| Drawing classification | Distinguish circuit schematics from existing PCB drawings |
+| Drawing classification | Conservative SVG/PDF text heuristics; confidence, evidence and review warnings |
 | AI recognition | Identify symbols, component labels, values, pins, pads, tracks, and board outlines |
 | Schematic reconstruction | Editable symbols, pin numbers, nets, power symbols, and junctions |
 | Human review | Confidence scores, source evidence, and correction of uncertain results |
@@ -121,7 +121,9 @@ docs/
 | Extension allow-list and 20 MB limit | Implemented in upload endpoint |
 | Local file storage | Implemented |
 | Drawing classifier interface | Implemented |
-| Real schematic/PCB classifier | Not implemented (placeholder returns `Unknown`) |
+| First-pass classifier | Implemented for SVG/PDF text evidence; ambiguous files remain `Unknown` |
+| Raster inspection | PNG/JPEG signature and dimensions; OCR/classification not configured |
+| Upload content signature validation | Implemented for supported formats |
 | Image preprocessing / OCR / AI recognition | Not implemented |
 | Schematic and netlist generation | Not implemented |
 | KiCad project generation | Not implemented |
@@ -174,7 +176,7 @@ Supported extensions in the current endpoint: `.png`, `.jpg`, `.jpeg`, `.pdf`, a
 
 By default, uploaded files are stored under `App_Data/uploads` relative to the API content root. The root can be changed with the `Storage:RootPath` configuration setting.
 
-**Note:** The current endpoint only accepts and stores the upload. The classifier returns `Unknown`; it does not yet extract components or electrical connections.
+**Note:** The response includes a preliminary `analysis` object with `kind`, `confidence`, `method`, `evidence`, `warnings`, and raster dimensions when available. SVG/PDF classification is based only on embedded text indicators and is not OCR or circuit understanding. Raster images remain `Unknown`. No components, pins, nets, or electrical connections are extracted.
 
 ## Roadmap
 
@@ -190,8 +192,10 @@ By default, uploaded files are stored under `App_Data/uploads` relative to the A
 ### Phase 2 — Image preprocessing and classification
 - [ ] Image orientation and perspective correction
 - [ ] PDF page rasterization and image normalization
-- [ ] Classify schematic vs. existing PCB drawing
-- [ ] Return classification confidence and review state
+- [x] Add conservative SVG/PDF text-based schematic vs. PCB-layout classification
+- [x] Return classification confidence, evidence, and review warnings
+- [x] Validate uploaded file signatures and safely parse SVG XML with DTD processing disabled
+- [ ] Add raster preprocessing, OCR, and visual classification
 
 ### Phase 3 — Recognition and human review
 - [ ] Component and label recognition
